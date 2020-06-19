@@ -47,6 +47,12 @@
         <p><img src="/images/servmon/servmon1.png" alt="" width="550"/></p>
         <p>We can see that there are a good amount of ports open, but what caught my eye first was FTP on port 21 and it allowed anonymous login.</p>
         <p><img src="/images/servmon/servmon2.png" alt="" /></p>
+        <p>If we anonymously log in to FTP, we can see that there is a Users directory that contains two files: <code>Confidential.txt</code> and <code>Notes to do.txt</code></p>       
+        <p><img src="/images/servmon/servmon3.png" alt="" width="550"/></p>
+        <p><h3>Foothold</h3></p>
+        <p>At this point, I had to some thinking to figure out what these clues were trying to tell me. I knew that there was a <code>Passwords.txt</code> file on Nathan's Desktop. I also saw that there were two services being used by the users, NVMS and NSClient. My <code>nmap</code> scan had revealed port 80 as open and when I checked it out in my browser, it showed a login page for NVMS-1000. After doing some research for vulnerabilities, I found that NVMS was vulnerable to a <a href="https://www.exploit-db.com/exploits/47774" target="_blank" >Directory Traversal attack.</a></p>        
+                
+        
         </article>
 
         <!-- Work -->
