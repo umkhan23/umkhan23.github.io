@@ -46,32 +46,32 @@
         <p>So first we start with an <code>nmap</code> scan</p>
         <span class="image main"><p><img src="/images/servmon/servmon1.png" alt="" width="550"/></p></span>
         <p>We can see that there are a good amount of ports open, but what caught my eye first was FTP on port 21 and it allowed anonymous login.</p>
-        <p><img src="/images/servmon/servmon2.png" alt="" /></p>
+        <span class="image main"><p><img src="/images/servmon/servmon2.png" alt="" /></p></span>
         <p>If we anonymously log in to FTP, we can see that there is a Users directory that contains two files: <code>Confidential.txt</code> and <code>Notes to do.txt</code></p>       
-        <p><img src="/images/servmon/servmon3.png" alt="" width="550"/></p>
+        <span class="image main"><p><img src="/images/servmon/servmon3.png" alt="" width="550"/></p></span>
         <p><h3>Foothold</h3></p>
         <p>At this point, I had to do some thinking to figure out what these clues were trying to tell me. I knew that there was a <code>Passwords.txt</code> file on Nathan's Desktop. I also saw that there were two services being used by the users, NVMS and NSClient. My <code>nmap</code> scan had revealed port 80 as open and when I checked it out in my browser, it showed a login page for NVMS-1000. After doing some research for vulnerabilities, I found that NVMS was vulnerable to a <a href="https://www.exploit-db.com/exploits/47774" target="_blank" >Directory Traversal attack.</a></p>        
-        <p><img src="/images/servmon/servmon6.png" alt="" width="550"/></p>        
+        <span class="image main"><p><img src="/images/servmon/servmon6.png" alt="" width="550"/></p>     </span>   
         <p>I used Burp Suite to intercept the request and I added the suspected path of the <code>Passwords.txt</code> file to the GET request, resulting in a web page that showed a list of passwords.</p>
-        <p><img src="/images/servmon/servmon7.png" alt="" width="550"/></p>
+        <span class="image main"><p><img src="/images/servmon/servmon7.png" alt="" width="550"/></p></span>
         <p><h3>User</h3></p>       
         <p>After a bit of bruteforcing, I was able to login to SSH as Nadine using the credentials <code>Nadine:L1k3B1gBut7s@W0rk</code>. A tool that can assist with bruteforcing smb shares if you have a list of users or passwords is <a href="https://github.com/byt3bl33d3r/CrackMapExec" target="_blank" >CrackMapExec.</a></p>        
-        <p><img src="/images/servmon/servmon8.png" alt="" /></p>        
+        <span class="image main"><p><img src="/images/servmon/servmon8.png" alt="" /></p>      </span>  
         <p>For privilege escalation, I knew I wanted to start looking into NSClient++ since it was the other third-party service besides NVMS installed on this machine and was something I had never heard of before. By visiting the NSClient++ web GUI on port 8443, we see that there is a way to figure out the password.</p>        
-        <p><img src="/images/servmon/servmon10.png" alt="" width="550"/></p>         
+        <span class="image main"><p><img src="/images/servmon/servmon10.png" alt="" width="550"/></p>   </span>      
         <p>By running the command within the Program Files, we're able to grab the password.</p>         
-        <p><img src="/images/servmon/servmon11.png" alt="" /></p>       
+        <span class="image main"><p><img src="/images/servmon/servmon11.png" alt="" /></p>       </span>
         <p>However, my excitement of finding the password died down when it wouldn't work. After some more enumeration, I found the NSClient configuration files called <code>nsclient.ini</code> which gave away very important information.</p>        
-        <p><img src="/images/servmon/servmon12.png" alt="" /></p>        
+        <span class="image main"><p><img src="/images/servmon/servmon12.png" alt="" /></p> </span>       
         <p>It showed that only localhost is allowed to sign in to the web GUI, which meant that I had to somehow trick NSClient into thinking that I am localhost. After a lot of digging, banging my head against the wall, and some nudges on the forums, I learned a neat trick known as <a href="https://www.ssh.com/ssh/tunneling/example" target="_blank" >SSH local port-forwarding.</a></p>         
         <p>By using the command <code>ssh -L 8443:127.0.0.1:8443 Nadine@10.10.10.184</code> we can SSH as Nadine and act as if we are localhost, which allows us to login to the NSClient++ web server.</p>   
         <p><h3>Root</h3></p>        
         <p>After logging in, I found an <a href="https://www.exploit-db.com/exploits/46802" target="_blank" >exploit</a> for NSClient++ which essentially discovered that low privilege users can get remote code execution by running scripts through the NSClient scheduled scripts module. Also, since NSClient runs as root, we are able to execute code as root as well and get a reverse shell as root.</p>        
-        <p><img src="/images/servmon/servmon18.png" alt="" width="550"/></p>        
+        <span class="image main"><p><img src="/images/servmon/servmon18.png" alt="" width="550"/></p>  </span>      
         <p>By transferring my <code>shell.bat</code> file as well as netcat to Nadine's machine, we can then execute the script using the NSClient++ web GUI.</p>
-        <p><img src="/images/servmon/servmon19.png" alt="" width="550"/></p>
+        <span class="image main"><p><img src="/images/servmon/servmon19.png" alt="" width="550"/></p></span>
         <p>By adding our script in the external scripts module, we can get NSClient to run it. As soon as I added the script, I reloaded the server under the control menu on the top-right corner. We can then run our script and get a root shell on the box.</p>        
-        <p><img src="/images/servmon/servmon22.png" alt="" width="550"/></p>        
+        <span class="image main"><p><img src="/images/servmon/servmon22.png" alt="" width="550"/></p></span>        
           
         </article>
 
