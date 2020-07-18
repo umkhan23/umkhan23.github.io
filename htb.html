@@ -26,6 +26,7 @@
                 <ul>
                         <li><a href="/index.html">Home</a></li>
                         <li><a href="#servmon">Servmon</a></li>
+                        <li><a href="#sauna">Sauna</a></li>
                         <li><a href="#traceback">Traceback</a></li>
                         <li><a href="#admirer">Admirer</a></li>
                         <li><a href="#blunder">Blunder</a></li>
@@ -74,6 +75,14 @@
         <p>By adding our script in the external scripts module, we can get NSClient to run it. As soon as I added the script, I reloaded the server under the control menu on the top-right corner. We can then run our script and get a root shell on the box.</p>        
         <span class="image main"><p><img src="/images/servmon/servmon22.png" alt="" width="550"/></p></span>        
           
+        </article>
+
+        <!-- Work -->
+        <article id="sauna">
+        <h2 class="major">Sauna</h2>
+        <span class="image main"><img src="/images/sauna/sauna0.png" alt="" /></span>
+        <p>Sauna is rated as an easy Windows box that involves exploiting a Kerberos misconfiguration to get the hash of a user account. From there we're able to enumerate and find the credentials for a service account in a registry and we can use that to lateral into a higher privileged account. In order to get root, we use mimikatz functions to dump hashes for the Administrator and log in as the Administrator to grab the root flag.</p>
+        <p></p>
         </article>
 
         <!-- Work -->
