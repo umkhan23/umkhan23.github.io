@@ -88,7 +88,7 @@
         <p>If we enumerate the webpage, we can see that there is a page with a bunch of employees of the company.</p>
         <span class="image main"><p><img src="/images/saunna/sauna2.png" alt="" width="550"/></p></span>
         <p>Most of the time in a corporate environment, Active Directory usernames consist of the first letter of the first name followed by the last name. So, we can create a list of usernames using that same rule.</p>
-        <span class="image main"><p><img src="/images/saunna/sauna13.png" alt="" width="550"/></p></span>
+        <span class="image main"><p><img src="/images/saunna/sauna13.png" alt="" /></p></span>
         <p><h3>Foothold</h3></p>
         <p>Since we know there is Kerberos on the machine, we can try to find any vulnerable user accounts on the machine that do not require Kerberos preauthentication. Using the <a href="https://github.com/SecureAuthCorp/impacket/blob/master/examples/GetNPUsers.py" target="_blank" >GetNPUsers.py</a> script by <a href="https://github.com/SecureAuthCorp/impacket" target="_blank" >impacket</a> can give us this information and also output any available password hashes. <a href="https://www.youtube.com/watch?time_continue=434&v=pZSyGRjHNO4&feature=emb_logo" target="_blank" >This</a> video explains the script in detail and helped me understand how it works.</p>
         <p>We can run the script against the list of users that we made earlier.</p>
@@ -114,6 +114,12 @@
         <span class="image main"><p><img src="/images/saunna/sauna10.png" alt="" width="550"/></p></span>
         <p>Mimikatz is a pretty neat tool that has a lot of different features so it can take some time to get used to it and understand the different commands. It took my a while to figure out what the commands do and I tested a lot of them out to figure out what would be best for this box. One of the commands on mimikatz is known as <code>lsadump</code> which essentially dumps anything in the Local Security Authority (LSA) registry. LSA secrets can contain lots of different privilege information, and <a href="https://ired.team/offensive-security/credential-access-and-credential-dumping/dumping-lsa-secrets" target="_blank" >this</a> article explains a bit more about the topic.
         <p>In order to dump any credentials for the Administrator account, we can run an <code>lsadump</code> for the Administrator user.</p>
+        <span class="image main"><p><img src="/images/saunna/sauna11.png" alt="" width="550"/></p></span>
+        <p>We can see that we're able to get the NTLM hash for the Administrator, and we can use it to get a privileged shell on the box.</p>
+        <span class="image main"><p><img src="/images/saunna/sauna12.png" alt="" width="550"/></p></span>
+        <p>The cool thing about Evil-WinRM is that you can log in to an account using a hash, so there's no need to spend time trying to crack it. Once we log in as the Administrator, we can grab the root flag.</p>
+        <p>Overall, I really enjoyed this box and I learned a lot about various Kerberos attack vectors and the tools you can use to exploit a Domain Controller. One thing I learned after some research is that the GetNPUsers.py script isn't really something that can be useful in a real-world engagement. Most admins dont check off the "Do not require Kerberos preauthentication" option when configuring Active Directory policies so it's a very rare attack vector. Another key thing which is more of a practical aspect related to exploiting Windows is that while I was trying to get accustomed to mimikatz, sometimes the prompt would infinetly loop and I would have to end my shell in order for it to stop. To get around that, I learned that you can just add the commands you want in quotes and then add the "exit" command to end mimikatz as soon as you get what you're looking for.</p>
+        <p>Another neat thing about this box was the lateral movement. It shows how service accounts are configured to have higher privileges that can be exploited if one is able to get access.</p>
 </article>
 
         <!-- Work -->
