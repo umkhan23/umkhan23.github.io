@@ -94,9 +94,9 @@
         <p>We can run the script against the list of users that we made earlier.</p>
         <p><code>python3 GetNPUsers.py EGOTISTICAL-BANK.LOCAL\ -usersfile users.txt -dc-ip 10.10.10.175</code></p>
         <p>The command below provides us with the hash for the <code>fsmith</code> user and gives us an outfile of the hash.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna3.png" alt="" width="550" height="550"/></p></span>
+        <span class="image main"><p><img src="/images/sauna/sauna3.png" alt="" width="550" /></p></span>
         <p>We can then use John to crack the hash.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna4.png" alt="" width="550" height="550" /></p></span>
+        <span class="image main"><p><img src="/images/sauna/sauna4.png" alt="" width="550" /></p></span>
         <p><h3>User</h3></p>
         <p>The creds for the user are <code>fsmith:Thestrokes23</code>.</p>
         <p>Since there isn't SSH on the box, we can use <a href="https://github.com/Hackplayers/evil-winrm" target="_blank" >Evil-WinRM</a> with the creds we just got to get a proper shell.</p>
