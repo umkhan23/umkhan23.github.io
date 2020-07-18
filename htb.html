@@ -82,8 +82,8 @@
         <h2 class="major">Sauna</h2>
         <span class="image main"><img src="/images/sauna/sauna0.png" alt="" /></span>
         <p>Sauna is rated as an easy Windows box that involves exploiting a Kerberos misconfiguration to get the hash of a user account. From there we're able to enumerate and find the credentials for a service account in a registry and we can use that to lateral into a higher privileged account. In order to get root, we use mimikatz functions to dump hashes for the Administrator and log in as the Administrator to grab the root flag.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna1.png" alt="" width="550"/></p></span>
         <p><h3>Enumeration</h3></p>
+        <span class="image main"><p><img src="/images/sauna/sauna1.png" alt="" width="550"/></p></span>
         <p>Our <code>nmap</code> scan reveals a bunch of ports open. The main ports that stood out to me were HTTP on port 80, Kerberos on port 88, and the ports that LDAP was on.</p>
         <p>If we enumerate the webpage, we can see that there is a page with a bunch of employees of the company.</p>
         <span class="image main"><p><img src="/images/sauna/sauna2.png" alt="" width="550"/></p></span>
