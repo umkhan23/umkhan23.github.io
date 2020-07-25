@@ -149,30 +149,35 @@
         <p><h3>User</h3></p>
         <p>The file contains some password in hexadecimal characters, so we could convert it to base64 then decode base64 to get the plaintext version of the password. However, after some Googling around I found out that the password was still in a decrypted form and there was a tool I found on <a href="https://github.com/jeroennijhof/vncpwd" target="_blank" >Github</a> that can be used to decrypt VNC passwords.</p>
         <span class="image main"><p><img src="/images/cascade/cascade9.png" alt="" /></p></span>        
-        <p>Since there isn't SSH on the box, we can use <a href="https://github.com/Hackplayers/evil-winrm" target="_blank" >Evil-WinRM</a> with the creds we just got to get a proper shell.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna5.png" alt="" width="550"/></p></span>
-        <p>Once we log in, we can grab the user flag.</p>
-        <p><h3>Root</h3></p>
-        <p>For privilege escalation, we can upload an enumeration script to see if it reveals any attack vectors.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna7_.png" alt="" width="550"/></p></span>
-        <p>We can upload <a href="https://github.com/absolomb/WindowsEnum" target="_blank" >WindowsEnum.ps1</a> and see if it provides us with anything interesting.</p>
-        <p>If we run the script, we're able to get creds for a service account on the box.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna8.png" alt="" width="550"/></p></span>
-        <p>We can then try logging in to the service account since usually they have higher privileges.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna9.png" alt="" width="550"/></p></span>
-        <p>Another tool that is helpful in exploiting Kerberos is <a href="https://github.com/gentilkiwi/mimikatz" target="_blank" >mimikatz.</a></p>
-        <span class="image main"><p><img src="/images/sauna/sauna10.png" alt="" width="550"/></p></span>
-        <p>Mimikatz is a pretty neat tool that has a lot of different features so it can take some time to get used to it and understand the different commands. It took me a while to figure out what the commands do and I tested a lot of them out to figure out what would be best for this box. One of the commands on mimikatz is known as <code>lsadump</code> which essentially dumps anything in the Local Security Authority (LSA) registry. LSA secrets can contain lots of privileged information, and <a href="https://ired.team/offensive-security/credential-access-and-credential-dumping/dumping-lsa-secrets" target="_blank" >this</a> article explains a bit more about the topic.
-        <p>In order to dump any credentials for the Administrator account, we can run an <code>lsadump</code> for the Administrator user.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna11.png" alt="" width="550"/></p></span>
-        <p>We can see that we're able to get the NTLM hash for the Administrator, and we can use it to get a privileged shell on the box.</p>
-        <span class="image main"><p><img src="/images/sauna/sauna12.png" alt="" width="550"/></p></span>
-        <p>The cool thing about Evil-WinRM is that you can log into an account using a hash, so there's no need to spend time trying to crack it. Once we log in as the Administrator, we can grab the root flag.</p>
-        <p>Overall, I really enjoyed this box and I learned a lot about various Kerberos attack vectors and the tools you can use to exploit a Domain Controller. One thing I learned after some research is that the GetNPUsers.py script isn't really something that can be useful in a real-world engagement. Most admins dont check off the "Do not require Kerberos preauthentication" option when configuring Active Directory policies so it's a very rare attack vector.</p>
-        <p>Another key thing which is more of a practical aspect related to exploiting Windows is that while I was trying to get accustomed to mimikatz, sometimes the prompt would infinetly loop and I would have to end my shell in order for it to stop. To get around that, I learned that you can just add the commands you want in quotes and then add the "exit" command to end mimikatz as soon as you get what you're looking for.</p>
+        <p>If we run the tool against the encrypted text, we get a password. From our enumeration of the samba shares, we know that there is another user on the box called s.smith, so we can test the password on that user through Evil-WinRM.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade10.png" alt="" /></p></span> 
+        <p>The creds work and we're able to grab the user flag!</p>
+        <p><h3>Privilege Escalation</h3></p>
+        <p>If we enumerate the machine using the access we currently have, we can find some interesting files within the 'Audit' directory.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade13.png" alt="" /></p></span>
+        <span class="image main"><p><img src="/images/cascade/cascade14.png" alt="" /></p></span>
+        <p>We can download these files onto our own machine to enumerate them further and see what information they reveal.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade12.png" alt="" /></p></span>
+        <p>The <code>Audit.db</code> file seems to contain creds for a service account, and it seems to be linked to both the executable and the dll file we downloaded. I transferred the files over to my Windows machine and decompiled it using <a href="https://github.com/0xd4d/dnSpy/releases" target="_blank" >dnSpy</a> to understand what it actually does.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade01.png" alt="" /></p></span>
+        <span class="image main"><p><img src="/images/cascade/cascade02.png" alt="" width="550" /></p></span>
+        <p>If we decompile both the dll and the binary, we can see that that the program is running an AES128 encryptor and decryptor and we're able to see both the Initializtion Vector as well as the key.</p>
+        <p>We can use an online AES decryptor with the information we acquired to decrypt the password.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade15.png" alt="" /></p></span>
+        <p>Once we get the decrypted password in base64, we can then decode it.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade16.png" alt="" /></p></span>
+        <p>The creds for the service account are <code>arksvc:w3lc0meFr31nd</code>. We can log in to the service account and enumerate further to see what else we can find.</p>
+        <p><h3>ٍRoot</h3></p>       
+        <p>For getting root, I really had to dive deep into Active Directory cmdlets and understand what we can use to enumerate Active Directory further. After a lot of researching and Googling around, I found out that its possible to view deleted Active Directory objects, and sometimes they can contain credentials which is pretty dangerous if something isn't deleted properly.</p>
+        <p>We can use the command <code>Get-ADObject -ldapFilter:"(msDS-LastKnownRDN=*)")</code> to view the relative distinguished name (RDN) of a deleted object using LDAP syntax. We can add the <code>-includeDeletedObjects</code> flag to view more information. Enumerating the query shows us that there is a TempAdmin user on the box which seemed pretty interesting.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade19.png" alt="" width="550" /></p></span>
+        <p>We can filter our command to view more information about the TempAdmin user.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade20.png" alt="" width="550" /></p></span>
+        <p>We can see that the query reveals a legacy password for the TempAdmin user. We can decode the base64 password and try using the credentials <code>Administrator:baCT3r1aN00dles</code>.</p>
+        <span class="image main"><p><img src="/images/cascade/cascade21.png" alt="" /></p></span>
+        <p>The credentials work and we're able to grab the root flag!</p>
+        <p>Overall, this box was really challenging. It involved lots of hurdles but it was unique in the sense that it forced me to dive deep into so many different topics. It involves a bit of crypto, lots of Active Directory, and really forced me to understand the </code>ldapsearch</code> command.</p>
 </article>
-
-
 
         <!-- Work -->
         <article id="traceback">
