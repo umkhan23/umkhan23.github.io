@@ -167,8 +167,8 @@
         <p>Once we get the decrypted password in base64, we can then decode it.</p>
         <span class="image main"><p><img src="/images/cascade/cascade16.png" alt="" /></p></span>
         <p>The creds for the service account are <code>arksvc:w3lc0meFr31nd</code>. We can log in to the service account and enumerate further to see what else we can find.</p>
-        <p><h3>ٍRoot</h3></p>       
-        <p>For getting root, I really had to dive deep into Active Directory cmdlets and understand what we can use to enumerate Active Directory further. After a lot of researching and Googling around, I found out that its possible to view deleted Active Directory objects, and sometimes they can contain credentials which is pretty dangerous if something isn't deleted properly.</p>
+        <p><h3>Root</h3></p>
+        <p>For getting root, I really had to dive deep into Active Directory cmdlets and understand what we can use to enumerate Active Directory further. After a lot of researching and Googling around, I found out that it's possible to view deleted Active Directory objects, and sometimes they can contain credentials which is pretty dangerous if the Recycling Bin is enabled.</p>
         <p>We can use the command <code>Get-ADObject -ldapFilter:"(msDS-LastKnownRDN=*)")</code> to view the relative distinguished name (RDN) of a deleted object using LDAP syntax. We can add the <code>-includeDeletedObjects</code> flag to view more information. Enumerating the query shows us that there is a TempAdmin user on the box which seemed pretty interesting.</p>
         <span class="image main"><p><img src="/images/cascade/cascade19.png" alt="" width="550" /></p></span>
         <p>We can filter our command to view more information about the TempAdmin user.</p>
