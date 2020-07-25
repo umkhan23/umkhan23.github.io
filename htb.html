@@ -161,7 +161,7 @@
         <p>The <code>Audit.db</code> file seems to contain creds for a service account, and it seems to be linked to both the executable and the dll file we downloaded. I transferred the files over to my Windows machine and decompiled it using <a href="https://github.com/0xd4d/dnSpy/releases" target="_blank" >dnSpy</a> to understand what it actually does.</p>
         <span class="image main"><p><img src="/images/cascade/cascade01.png" alt="" /></p></span>
         <span class="image main"><p><img src="/images/cascade/cascade02.png" alt="" width="550" /></p></span>
-        <p>If we decompile both the dll and the binary, we can see that that the program is running an AES128 encryptor and decryptor and we're able to see both the Initializtion Vector as well as the key.</p>
+        <p>If we decompile both the dll and the binary, we can see that that the program is running an AES128 encryptor and decryptor and we're able to see both the Initialization Vector as well as the key.</p>
         <p>We can use an online AES decryptor with the information we acquired to decrypt the password.</p>
         <span class="image main"><p><img src="/images/cascade/cascade15.png" alt="" /></p></span>
         <p>Once we get the decrypted password in base64, we can then decode it.</p>
