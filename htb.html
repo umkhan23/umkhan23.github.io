@@ -183,7 +183,13 @@
         <article id="traceback">
         <h2 class="major">Traceback</h2>
         <span class="image main"><img src="https://miro.medium.com/max/1188/1*J9oQgkmo45Ov4k2Kk7bL-A.png" alt="" /></span>
-        <p>The writeup will be available once the machine retires.</p>
+        <p>Traceback is rated as an easy Linux box and involves using a backdoor on a webserver that is set in place by a malicious intruder. We can use this backdoor to get a shell on the user's machine but in order to get the user flag, some lateral movement into another user is required. For the root flag, enumerating the box reveals that we're able to manipulate the header message to display the flag as we log into the system using SSH.</p>
+        <p><h3>Enumeration</h3></p>
+        <p>We can begin with an <code>nmap</code> scan which reveals that there are only two ports open.</p>
+        <span class="image main"><img src="/images/traceback/traceback1.png" alt="" /></span>
+        <p>If we check out port 80 on our web browser, we see a webpage with a strange message.</p>
+        <span class="image main"><img src="/images/traceback/traceback2.png" alt="" width="550" /></span>
+        <p>After googling around, I found a <a href="https://github.com/Xh4H/Web-Shells" target="_blank">Github</a> repo by Xh4H that had a list of webshells which could be what the "backdoor" was referring to. I made a wordlist using the list of web shells and ran a <code>gobuster</code> against the web page to find the backdoor.</p>
         </article>
 
         <!-- About -->
