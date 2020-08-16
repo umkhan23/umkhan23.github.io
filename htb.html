@@ -190,7 +190,31 @@
         <p>If we check out port 80 on our web browser, we see a webpage with a strange message.</p>
         <span class="image main"><img src="/images/traceback/traceback2.png" alt="" width="550" /></span>
         <p>After googling around, I found a <a href="https://github.com/Xh4H/Web-Shells" target="_blank">Github</a> repo by Xh4H that had a list of webshells which could be what the "backdoor" was referring to. I made a wordlist using the list of web shells and ran a <code>gobuster</code> against the web page to find the backdoor.</p>
-        </article>
+        <span class="image main"><img src="/images/traceback/traceback4.png" alt="" /></span>
+        <p><h3>Foothold</h3></p>
+        <p>I checked out <code>smevk.php</code> and it turned out to have a log in page. The credentials were <code>admin:admin</code> and after logging in, we see that there is a code injection tab where we can add a reverse shell.</p>
+        <span class="image main"><img src="/images/traceback/traceback6.png" alt="" width="550"/></span>
+        <p>I used the php reverse shell from <a href="https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php" target="_blank">Pentest Monkey</a> and after injecting the code, I was able to get a reverse shell as the webadmin user.</p>
+        <span class="image main"><img src="/images/traceback/traceback7.png" alt="" /></span>
+        <p><h3>User</h3></p>
+        <p>After upgrading my shell and enumerating the box further, I found an interesting note that referred to Lua.</p>
+        <span class="image main"><img src="/images/traceback/traceback8.png" alt="" /></span>
+        <p>Lua is a programming language and I knew from other boxes that I worked on that programming languages can be used to escalate privileges. By running <code>sudo -l</code>, we can see what commands we can run on the box as sudo.</p>
+        <span class="image main"><img src="/images/traceback/traceback10.png" alt="" /></span>
+        <p><a href="https://gtfobins.github.io/gtfobins/lua/" target="_blank">GTFOBins</a> tells us that there is a way to break out of a restricted shell using the Lua programming language. We're able to get the user flag as sysadmin.</p>
+        <span class="image main"><img src="/images/traceback/traceback12.png" alt="" /></span>
+        <p><h3>Root</h3></p>
+        <p>We can run a really neat tool called <a href="https://github.com/DominicBreuker/pspy" target="_blank">pspy</a> which lets you monitor processes on a machine without the need for root permissions.</p>
+        <span class="image main"><img src="/images/traceback/traceback13.png" alt="" width="550"/></span>
+        <p>We can see that there is a cronjob that runs every 30 seconds and backs up the entire <code>update-motd.d</code> folder. After doing some research, I found that this folder contains something called "Message of the Day" which basically runs whenever you SSH into a machine.</p>
+        <span class="image main"><img src="/images/traceback/traceback14.png" alt="" /></span>
+        <p>We can see that the sysadmin user has write permissions for the <code>00-header</code> file, which means that we can make the Message of the Day display anything we want. I updated the file to make it display the contents of <code>root.txt</code> when we SSH into the machine as the webadmin user.</p>
+        <span class="image main"><img src="/images/traceback/traceback15.png" alt="" /></span>
+        <p>Once we SSH as webadmin, we can get the root flag.</p>
+        <span class="image main"><img src="/images/traceback/traceback16.png" alt="" /></span>
+        <p>One thing to keep in mind is that the last two steps must be done within 30 seconds, otherwise the entire <code>update-motd.d</code> folder will be backed up and any changes you make to the header file will be reset</p>
+        <p>Overall this was a really fun box to work on and wasn't too challenging. It shows how dangerous it can be to give root permissions on a programming language because they can be used to execute OS commands, resulting in a privileged shell. Another key thing I learned from this box is the importance of logging and monitoring. Whoever defaced the webpage left a backdoor for anyone to access, so it's crucial to monitor a compromised webpage to reduce the chance for an attacker to create persistence.</p>
+</article>
 
         <!-- About -->
         <article id="admirer">
