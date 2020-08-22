@@ -220,8 +220,43 @@
         <article id="magic">
                 <h2 class="major">Magic</h2>
                 <span class="image main"><img src="/images/magic.png" alt="" /></span>
-                <p>The writeup will be available once the machine retires.</p>
-              </article>
+                <p>Magic is rated as a medium Linux machine that involves using SQL injection to bypass a login page that allows us to upload image files. In order to get command execution, we must upload a malicious image file that is maniupulated to include a PHP script inside to run system commands. We're able to do this by using a tool called <a href="https://exiftool.org/" target="_blank">exiftool</a>. From there, we can execute a Python3 reverse shell to get a shell on the box and enumerate the MySQL Database to get the user's creds. For privilege escalation, we see that we have permission to run the <code>sysinfo</code> command, and we can manipulate the PATH to call a malicious <code>lshw</code> command that gets us a reverse shell as root.</p>
+                <p><h3>Enumeration</h3></p>
+                <span class="image main"><img src="/images/magic/magic1.png" alt="" width="550" /></span>
+<p>Our <code>nmap</code> scan only reveals two open ports, 22 and 80.</p>
+<span class="image main"><img src="/images/magic/magic2.png" alt="" width="550" /></span>
+<p>We find a <code>login.php</code> page on the website, and we can bypass it by using SQL Injection.</p>
+<span class="image main"><img src="/images/magic/magic3.png" alt="" /></span> 
+<p>Once we're logged in, we see a page where we can upload images. I tried uploading a text file but that didn't work so from there I knew the only accepted formats would be <code>.jpg</code> and <code>.png</code>.</p>
+<p>To test it out, I just uploaded the first picture I could find on my box, which was my <code>nmap</code> scan for this box.</p>
+<span class="image main"><img src="/images/magic/magic4.png" alt="" width="550"/></span> 
+<p><h3>Foothold</h3></p>
+<p>At this point, I tried figuring out a way to upload a reverse shell by using an image file and I vageuly knew about this from <a href="https://ippsec.rocks/" target="_blank">Ippsec</a> videos that I had watched. After some research, I found <a href="https://www.wattpad.com/149519448-pentesting-tutorials-chapter-viii-uploading-a" target="_blank">this</a> article that does a great job explaining how to use exiftool to manipulate an image.</p>
+<span class="image main"><img src="/images/magic/magic5.png" alt="" width="550"/></span> 
+<p>After uploading our malicious image, we can visit it on the webpage and we're able to execute commands! We can do this by using the 'cmd' GET parameter we embedded in our image file.</p>
+<span class="image main"><img src="/images/magic/magic7.png" alt="" /></span> 
+<p>At first I tried adding a Bash reverse shell but for some reason it wouldn't work. Then I tried the Python reverse shell from Pentest Monkey but that didn't work either. I figured that the box only had Python3 so when I executed a Python3 shell I was able to get a shell on the box as the <code>www-data</code> user.</p>
+<span class="image main"><img src="/images/magic/magic8.png" alt="" /></span> 
+<p><h3>User</h3></p>
+<p>After enumerating the <code>/var/wwww</code> files, I found a <code>db.php5</code> file that contained some creds.</p>
+<span class="image main"><img src="/images/magic/magic9.png" alt="" /></span> 
+<p>I tried switching to the user using the creds I found but it didn't work. I knew the creds were for a database based on the file so I checked to see if MySQL was running on the box.</p>
+<span class="image main"><img src="/images/magic/magic10.png" alt="" width="550"/></span> 
+<p>Now we can use the database creds to enumerate MySQL and dump any creds that it has. I found a nice cheat sheet when dealing with MySQL commands that you can check out <a href="https://www.phillips321.co.uk/2012/03/06/mysql-cheat-sheet/" target="_blank">here</a>. We can use the <code>mysqldump</code> command and we're able to find the actual creds for the <code>theseus</code> user.</p>
+<span class="image main"><img src="/images/magic/magic11.png" alt="" width="550"/></span> 
+<p>We're now able to grab the user flag!</p>
+<span class="image main"><img src="/images/magic/magic12.png" alt="" /></span> 
+<p>I decided to SSH into the box as <code>theseus</code> just so I could have a smoother shell. It's a good idea to do this whenever you have proper creds for a user since sometimes machines can be unstable.</p>
+<p>After enumerating the box using <a href="https://github.com/rebootuser/LinEnum" target="_blank">LinEnum</a>, I noticed that the <code>theseus</code> user had permission to run the <code>sysinfo</code> command. I was also guided to look into the <code>sysinfo</code> binary by getting some help on the forums and the Hack The Box Discord. This isn't something that I would have noticed myself. After doing some research, I found that SUID binaries can be used for privilege escalation and <a href="https://www.hackingarticles.in/linux-privilege-escalation-using-suid-binaries/" target="_blank">this</a> article explains the topic in great detail.</p>
+<p>By running <code>sysinfo</code>, we see that it runs a bunch of different system checks. One of the checks it runs is the <code>lshw</code> command, which lists hardware configuration on a machine such as CPU information, firmware version, and more. We can create our own malicious <code>lshw</code> command that runs a reverse shell that allows us to get a shell on the box as root.</p>
+<span class="image main"><img src="/images/magic/magic15.png" alt="" /></span> 
+<p>At first, I tried running a Bash reverse shell but for some reason it just wouldn't work. I made the malicious file on my own box and transferred it over the Magic and it still didn't work. I guess this box just didn't like Bash reverse shells. I decided to try again with a Python3 reverse shell instead.</p>
+<span class="image main"><img src="/images/magic/magic16.png" alt="" width="550"/></span> 
+<p>After creating the file, I had to change the <code>PATH</code> so that the <code>sysinfo</code> command would call my malicious <code>lshw</code>. The command <code>export PATH=:$PATH</code> changes the <code>PATH</code> for all users so doing this was necessary since the <code>sysinfo</code> command ran as root.</p>
+<p>We can then set up a listener on our own machine and run <code>sysinfo</code>, and we're able to get a shell as root.</p>
+<span class="image main"><img src="/images/magic/magic17.png" alt="" /></span> 
+
+</article>
 
 
 
