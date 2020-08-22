@@ -231,7 +231,7 @@
 <p>To test it out, I just uploaded the first picture I could find on my box, which was my <code>nmap</code> scan for this box.</p>
 <span class="image main"><img src="/images/magic/magic4.png" alt="" width="550"/></span> 
 <p><h3>Foothold</h3></p>
-<p>At this point, I tried figuring out a way to upload a reverse shell by using an image file and I vageuly knew about this from <a href="https://ippsec.rocks/" target="_blank">Ippsec</a> videos that I had watched. After some research, I found <a href="https://www.wattpad.com/149519448-pentesting-tutorials-chapter-viii-uploading-a" target="_blank">this</a> article that does a great job explaining how to use exiftool to manipulate an image.</p>
+<p>At this point, I tried figuring out a way to upload a reverse shell by using an image file and I vaguely knew about this from <a href="https://ippsec.rocks/" target="_blank">Ippsec</a> videos that I had watched. After some research, I found <a href="https://www.wattpad.com/149519448-pentesting-tutorials-chapter-viii-uploading-a" target="_blank">this</a> article that does a great job explaining how to use exiftool to manipulate an image.</p>
 <span class="image main"><img src="/images/magic/magic5.png" alt="" width="550"/></span> 
 <p>After uploading our malicious image, we can visit it on the webpage and we're able to execute commands! We can do this by using the 'cmd' GET parameter we embedded in our image file.</p>
 <span class="image main"><img src="/images/magic/magic7.png" alt="" /></span> 
